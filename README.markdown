@@ -13,32 +13,32 @@ Tested with rsyslog-5.8.0.
 
 1. Apply the patch 'rsyslog-zeromq.patch' to the source of rsyslog:
 
-    cd path/to/rsyslog-5.8.0
-    patch -p1 -i rsyslog-zeromq.patch
+        cd path/to/rsyslog-5.8.0
+        patch -p1 -i rsyslog-zeromq.patch
 
 2. Copy imzeromq and omzeromq directories to plugins directory of
    rsyslog source.
 
-    rsync -av {i,o}mzeromq path/to/rsyslog-5.8.0/plugins
+        rsync -av {i,o}mzeromq path/to/rsyslog-5.8.0/plugins
 
 3. Regenerate autotools related files:
 
-    cd path/to/rsyslog-5.8.0
-    autoreconf
+        cd path/to/rsyslog-5.8.0
+        autoreconf
 
 4. Add '--enable-imzeromq' and '--enable-omzeromq' to ./configure
    switches.
 
-    ./configure \
-    --enable-imzeromq \
-    --enable-omzeromq \
-    <your-other-flags-here>
+        ./configure \
+        --enable-imzeromq \
+        --enable-omzeromq \
+        <your-other-flags-here>
 
 5. Build and install.
 
-    cd path/to/rsyslog-5.8.0
-    make
-    make install
+        cd path/to/rsyslog-5.8.0
+        make
+        make install
 
 # Configuring the output module (omzeromq)
 
@@ -56,13 +56,13 @@ a trailing ";<FORMAT>" specifier.
 
 Examples:
 
-    $ModLoad omzeromq.so
-
-    # Minimal configuration:
-    *.* :omzeromq:bind=tcp://*:5557
-
-    # Full config, all parameters specified:
-    *.* :omzeromq:bind=tcp://*:5557,hwm=1000,swap=9999,identity=foobar,threads=1;RSYSLOG_ForwardFormat
+        $ModLoad omzeromq.so
+        
+        # Minimal configuration:
+        *.* :omzeromq:bind=tcp://*:5557
+        
+        # Full config, all parameters specified:
+        *.* :omzeromq:bind=tcp://*:5557,hwm=1000,swap=9999,identity=foobar,threads=1;RSYSLOG_ForwardFormat
 
 # Configuring the input module (imzeromq)
 
@@ -74,12 +74,12 @@ The $InputZeroMQServerRun directive takes the following parameter components:
 
 Examples:
 
-    $ModLoad imzeromq.so
-
-    $RuleSet Events
-
-    ... ruleset definition here ...
-
-    # Provides ZeroMQ reception
-    $InputZeroMQServerBindRuleset Events
-    $InputZeroMQServerRun       connect=tcp://*:5557,identity=yoyo
+        $ModLoad imzeromq.so
+        
+        $RuleSet Events
+        
+        ... ruleset definition here ...
+        
+        # Provides ZeroMQ reception
+        $InputZeroMQServerBindRuleset Events
+        $InputZeroMQServerRun       connect=tcp://*:5557,identity=yoyo
