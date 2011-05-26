@@ -44,15 +44,15 @@ Tested with rsyslog-5.8.0.
 
 The :omzeromq: selector takes the following parameter components:
 
-* connect=<endpoint>    Connect to the specified endpoint.
-* bind=<endpoint>       Bind to the specified endpoint.
-* identity=<identstr>   Sets the identity of the socket.
-* hwm=<NNN>             Sets the high water mark of the socket.
-* swap=<NNN>            Sets the swap value for the socket.
-* threads=<N>           Sets the number of zeromq context threads.
+* connect=&lt;endpoint&gt;    Connect to the specified endpoint.
+* bind=&lt;endpoint&gt;       Bind to the specified endpoint.
+* identity=&lt;identstr&gt;   Sets the identity of the socket.
+* hwm=&lt;NNN&gt;             Sets the high water mark of the socket.
+* swap=&lt;NNN&gt;            Sets the swap value for the socket.
+* threads=&lt;N&gt;           Sets the number of zeromq context threads.
 
 The format for the selector may be specified in the standard way with
-a trailing ";<FORMAT>" specifier.
+a trailing ";&lt;FORMAT&gt;" specifier.
 
 Examples:
 
@@ -68,9 +68,9 @@ Examples:
 
 The $InputZeroMQServerRun directive takes the following parameter components:
 
-* connect=<endpoint>    Connect to the specified endpoint.
-* bind=<endpoint>       Bind to the specified endpoint.
-* identity=<identstr>   Sets the identity of the socket.
+* connect=&lt;endpoint&gt;    Connect to the specified endpoint.
+* bind=&lt;endpoint&gt;       Bind to the specified endpoint.
+* identity=&lt;identstr&gt;   Sets the identity of the socket.
 
 Examples:
 
