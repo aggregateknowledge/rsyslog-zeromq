@@ -188,6 +188,22 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
 		ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
     }
 
+    // Set identities and options *before* the connect/bind.
+
+    if (identstr)
+    {
+        rv = zmq_setsockopt(sock, ZMQ_IDENTITY,
+                            identstr, strlen(identstr));
+        if (rv)
+        {
+            errmsg.LogError(0,
+                            RS_RET_INVALID_PARAMS,
+                            "zmq_setsockopt failed: %s",
+                            strerror(errno));
+            ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
+        }
+    }
+
     if (connstr)
     {
         rv = zmq_connect(sock, connstr);
@@ -208,20 +224,6 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
             errmsg.LogError(0,
                             RS_RET_INVALID_PARAMS,
                             "zmq_bind failed: %s",
-                            strerror(errno));
-            ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
-        }
-    }
-
-    if (identstr)
-    {
-        rv = zmq_setsockopt(sock, ZMQ_IDENTITY,
-                            identstr, strlen(identstr));
-        if (rv)
-        {
-            errmsg.LogError(0,
-                            RS_RET_INVALID_PARAMS,
-                            "zmq_setsockopt failed: %s",
                             strerror(errno));
             ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
         }

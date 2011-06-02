@@ -103,10 +103,8 @@ static rsRetVal init_zeromq(instanceData *pData, int bSilent)
     pData->context = zmq_init(pData->threads);
     pData->socket = zmq_socket(pData->context, ZMQ_PUSH);
 
-    if (pData->connstr)
-        zmq_connect(pData->socket, (char *) pData->connstr);
-    else
-        zmq_bind(pData->socket, (char *) pData->bindstr);
+    // Set options and identities *first* before the connect
+    // and/or bind ...
 
     if (pData->hwmsz != -1)
         zmq_setsockopt(pData->socket, ZMQ_HWM,
@@ -119,6 +117,11 @@ static rsRetVal init_zeromq(instanceData *pData, int bSilent)
     if (pData->identstr)
         zmq_setsockopt(pData->socket, ZMQ_IDENTITY,
                        pData->identstr, ustrlen(pData->identstr));
+
+    if (pData->connstr)
+        zmq_connect(pData->socket, (char *) pData->connstr);
+    else
+        zmq_bind(pData->socket, (char *) pData->bindstr);
 
 	RETiRet;
 }
