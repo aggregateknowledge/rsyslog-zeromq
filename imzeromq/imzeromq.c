@@ -107,6 +107,8 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
     char * connstr = NULL;
     char * bindstr = NULL;
     char * identstr = NULL;
+    char * patternstr = NULL;
+    int pattern = ZMQ_PULL;
 
     char * ptr1;
     char * binding;
@@ -142,6 +144,10 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
         {
             CHKmalloc(identstr = strdup(val));
         }
+        else if (strcmp(binding, "pattern") == 0)
+        {
+            CHKmalloc(patternstr = strdup(val));
+        }
         else
         {
             errmsg.LogError(0, NO_ERRCODE, "Unknown argument %s", binding);
@@ -167,6 +173,26 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
 		ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
     }
 
+    // check for valid patterns (pull is default)
+    if (patternstr)
+    {
+        if (strcmp(binding, "pull") == 0)
+        {
+            pattern = ZMQ_PULL;
+        }
+        else if (strcmp(binding, "sub") == 0)
+        {
+            pattern = ZMQ_SUB;
+        }
+        else
+        {
+            errmsg.LogError(0,
+                            RS_RET_INVALID_PARAMS, "error: "
+                            "invalid messaging pattern - use 'pull' or 'sub'");
+            ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
+        }
+    }
+
     if (!s_context)
         s_context = zmq_init(1);
     if (!s_context)
@@ -178,7 +204,7 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
 		ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
     }
 
-    void * sock = zmq_socket(s_context, ZMQ_PULL);
+    void * sock = zmq_socket(s_context, pattern);
     if (!sock)
     {
 		errmsg.LogError(0,

@@ -60,6 +60,7 @@ typedef struct _instanceData {
     int64		swapsz;
     uchar *		identstr;
     int64		threads;
+    int			pattern;
 
     void *		context;
     void *		socket;
@@ -101,7 +102,7 @@ static rsRetVal init_zeromq(instanceData *pData, int bSilent)
 	ASSERT(pData->socket == NULL);
 
     pData->context = zmq_init(pData->threads);
-    pData->socket = zmq_socket(pData->context, ZMQ_PUSH);
+    pData->socket = zmq_socket(pData->context, pData->pattern);
 
     // Set options and identities *first* before the connect
     // and/or bind ...
@@ -177,6 +178,7 @@ CODE_STD_STRING_REQUESTparseSelectorAct(1)
 
     pData->connstr = NULL;
     pData->bindstr = NULL;
+    pData->pattern = ZMQ_PUSH;
     pData->hwmsz = -1;
 	pData->swapsz = -1;
     pData->identstr = NULL;
@@ -242,6 +244,25 @@ CODE_STD_STRING_REQUESTparseSelectorAct(1)
             if (*endp != '\0')
             {
                 errmsg.LogError(0, NO_ERRCODE, "Invalid threads value %s", val);
+                ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
+            }
+        }
+        else if (strcmp(binding, "pattern") == 0)
+        {
+            if (strcmp(val, "push") == 0)
+            {
+                pData->pattern = ZMQ_PUSH;
+            }
+            else if (strcmp(val, "pub") == 0)
+            {
+                pData->pattern = ZMQ_PUB;
+            }
+            else
+            {
+                errmsg.LogError(0,
+                                RS_RET_INVALID_PARAMS,
+                                "error: invalid messaging pattern "
+                                "- use 'push' or 'pub'");
                 ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
             }
         }

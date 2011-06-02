@@ -50,6 +50,7 @@ The :omzeromq: selector takes the following parameter components:
 * hwm=&lt;NNN&gt;             Sets the high water mark of the socket.
 * swap=&lt;NNN&gt;            Sets the swap value for the socket.
 * threads=&lt;N&gt;           Sets the number of zeromq context threads.
+* pattern=&lt;patternstr&gt;  Sets the messaging pattern (push or pub).
 
 The format for the selector may be specified in the standard way with
 a trailing ";&lt;FORMAT&gt;" specifier.
@@ -71,6 +72,7 @@ The $InputZeroMQServerRun directive takes the following parameter components:
 * connect=&lt;endpoint&gt;    Connect to the specified endpoint.
 * bind=&lt;endpoint&gt;       Bind to the specified endpoint.
 * identity=&lt;identstr&gt;   Sets the identity of the socket.
+* pattern=&lt;patternstr&gt;  Sets the messaging pattern (pull or sub).
 
 Examples:
 
