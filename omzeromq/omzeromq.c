@@ -104,7 +104,7 @@ static rsRetVal init_zeromq(instanceData *pData, int bSilent)
     pData->socket = zmq_socket(pData->context, ZMQ_PUSH);
 
     if (pData->connstr)
-        zmq_bind(pData->socket, (char *) pData->connstr);
+        zmq_connect(pData->socket, (char *) pData->connstr);
     else
         zmq_bind(pData->socket, (char *) pData->bindstr);
 
