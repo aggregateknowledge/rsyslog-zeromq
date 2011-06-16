@@ -176,11 +176,11 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
     // check for valid patterns (pull is default)
     if (patternstr)
     {
-        if (strcmp(binding, "pull") == 0)
+        if (strcmp(patternstr, "pull") == 0)
         {
             pattern = ZMQ_PULL;
         }
-        else if (strcmp(binding, "sub") == 0)
+        else if (strcmp(patternstr, "sub") == 0)
         {
             pattern = ZMQ_SUB;
         }
