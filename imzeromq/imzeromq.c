@@ -108,6 +108,8 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
     char * bindstr = NULL;
     char * identstr = NULL;
     char * patternstr = NULL;
+    int nsubs = 0;
+    char ** subs = NULL;
     int pattern = ZMQ_PULL;
 
     char * ptr1;
@@ -147,6 +149,15 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
         else if (strcmp(binding, "pattern") == 0)
         {
             CHKmalloc(patternstr = strdup(val));
+        }
+        else if (strcmp(binding, "subscribe") == 0)
+        {
+            // Add the subscription value to the list.
+            char * substr = NULL;
+            CHKmalloc(substr = strdup(val));
+            CHKmalloc(subs = realloc(subs, sizeof(char *) * nsubs + 1));
+            subs[nsubs] = substr;
+            ++nsubs;
         }
         else
         {
@@ -193,6 +204,25 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
         }
     }
 
+    // Only SUB pattern supports subscriptions.
+    if (nsubs && pattern != ZMQ_SUB)
+    {
+        errmsg.LogError(0,
+                        RS_RET_INVALID_PARAMS, "error: "
+                        "subscribe specified for non SUB socket");
+        ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
+    }
+
+    // You need at least one subscription.
+    if (pattern == ZMQ_SUB && nsubs == 0)
+    {
+        errmsg.LogError(0,
+                        RS_RET_INVALID_PARAMS, "error: "
+                        "at least one subscribe needed for SUB socket. "
+                        "Hint: add subscribe=,");
+        ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
+    }
+
     if (!s_context)
         s_context = zmq_init(1);
     if (!s_context)
@@ -224,7 +254,22 @@ static rsRetVal add_endpoint(void __attribute__((unused)) * oldp, uchar * valp)
         {
             errmsg.LogError(0,
                             RS_RET_INVALID_PARAMS,
-                            "zmq_setsockopt failed: %s",
+                            "zmq_setsockopt ZMQ_IDENTITY failed: %s",
+                            strerror(errno));
+            ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
+        }
+    }
+
+    // Set subscriptions.
+    int ii;
+    for (ii = 0; ii < nsubs; ++ii)
+    {
+        rv = zmq_setsockopt(sock, ZMQ_SUBSCRIBE, subs[ii], strlen(subs[ii]));
+        if (rv)
+        {
+            errmsg.LogError(0,
+                            RS_RET_INVALID_PARAMS,
+                            "zmq_setsockopt ZMQ_SUBSCRIBE failed: %s",
                             strerror(errno));
             ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
         }

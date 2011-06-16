@@ -73,6 +73,7 @@ The $InputZeroMQServerRun directive takes the following parameter components:
 * bind=&lt;endpoint&gt;       Bind to the specified endpoint.
 * identity=&lt;identstr&gt;   Sets the identity of the socket.
 * pattern=&lt;patternstr&gt;  Sets the messaging pattern (pull or sub).
+* subscribe=&lt;filterstr&gt; Sets a subscription filter.
 
 Examples:
 
@@ -82,6 +83,14 @@ Examples:
         
         ... ruleset definition here ...
         
-        # Provides ZeroMQ reception
-        $InputZeroMQServerBindRuleset Events
-        $InputZeroMQServerRun       connect=tcp://*:5557,identity=yoyo
+        # Provides ZeroMQ reception on a PULL socket.
+        $InputZeroMQServerBindRuleset Events1
+        $InputZeroMQServerRun  pattern=pull,connect=tcp://*:5557,identity=yoyo
+
+        # Subscribe to all records from a SUB socket (empty filter string)
+        $InputZeroMQServerBindRuleset Events2
+        $InputZeroMQServerRun  pattern=sub,connect=tcp://*:5557,subscribe=,
+
+        # Subscribe to just "foo" and "bar" records.
+        $InputZeroMQServerBindRuleset Events3
+        $InputZeroMQServerRun  pattern=sub,connect=tcp://*:5557,subscribe=foo,subscribe=bar
