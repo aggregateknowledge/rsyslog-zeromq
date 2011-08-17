@@ -143,13 +143,43 @@ CODESTARTdoAction
 
 	size_t len = strlen((char *) ppString[0]);
 
-    zmq_msg_t msg;
-    zmq_msg_init_size(&msg, len);
-	memcpy(zmq_msg_data(&msg), ppString[0], len);
-    int rc = zmq_send(pData->socket, &msg, ZMQ_NOBLOCK);
-    zmq_msg_close(&msg);
+    // If we're a REP socket, we check for an incoming request.
+    if (pData->pattern == ZMQ_REP)
+    {
+        // ZMQ_REP sockets only send when we can read a request.
+        zmq_msg_t reqmsg;
+        zmq_msg_init(&reqmsg);
+        int rc = zmq_recv(pData->socket, &reqmsg, 0);
+        zmq_msg_close(&reqmsg);
+        if (rc != 0)
+        {
+            // Something is wrong.
+            iRet = RS_RET_SUSPENDED;
+        }
+        else
+        {
+            // OK, we read a request, return a response ...
+            zmq_msg_t msg;
+            zmq_msg_init_size(&msg, len);
+            memcpy(zmq_msg_data(&msg), ppString[0], len);
+            rc = zmq_send(pData->socket, &msg, ZMQ_NOBLOCK);
+            zmq_msg_close(&msg);
 
-	iRet = rc != 0 ? RS_RET_SUSPENDED : RS_RET_OK;
+            iRet = rc != 0 ? RS_RET_SUSPENDED : RS_RET_OK;
+        }
+    }
+    else
+    {
+        // All other "normal" socket types come here and send.
+        zmq_msg_t msg;
+        zmq_msg_init_size(&msg, len);
+        memcpy(zmq_msg_data(&msg), ppString[0], len);
+        int rc = zmq_send(pData->socket, &msg, ZMQ_NOBLOCK);
+        zmq_msg_close(&msg);
+
+        iRet = rc != 0 ? RS_RET_SUSPENDED : RS_RET_OK;
+    }
+
 finalize_it:
 ENDdoAction
 
@@ -256,6 +286,10 @@ CODE_STD_STRING_REQUESTparseSelectorAct(1)
             else if (strcmp(val, "pub") == 0)
             {
                 pData->pattern = ZMQ_PUB;
+            }
+            else if (strcmp(val, "rep") == 0)
+            {
+                pData->pattern = ZMQ_REP;
             }
             else
             {
