@@ -3,6 +3,8 @@ rsyslog-zeromq
 
 ZeroMQ input and output modules for rsyslog.
 
+NOTE - WORK IN PROGRESS TO CONVERT TO rsyslog v6 ...
+
 This module allows rsyslog to read and write ZeroMQ messages.
 
 # Installing rsyslog-zeromq
