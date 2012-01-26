@@ -9,23 +9,23 @@ This module allows rsyslog to read and write ZeroMQ messages.
 
 # Installing rsyslog-zeromq
 
-Tested with rsyslog-5.8.0.
+Tested with rsyslog-devel (v6-devel).
 
 0. Install zeromq, will need headers and devel libraries ...
 
 1. Apply the patch 'rsyslog-zeromq.patch' to the source of rsyslog:
 
-        cd path/to/rsyslog-5.8.0
+        cd path/to/rsyslog-devel
         patch -p1 -i rsyslog-zeromq.patch
 
 2. Copy imzeromq and omzeromq directories to plugins directory of
    rsyslog source.
 
-        rsync -av {i,o}mzeromq path/to/rsyslog-5.8.0/plugins
+        rsync -av {i,o}mzeromq path/to/rsyslog-devel/plugins
 
 3. Regenerate autotools related files:
 
-        cd path/to/rsyslog-5.8.0
+        cd path/to/rsyslog-devel
         autoreconf
 
 4. Add '--enable-imzeromq' and '--enable-omzeromq' to ./configure
@@ -38,7 +38,7 @@ Tested with rsyslog-5.8.0.
 
 5. Build and install.
 
-        cd path/to/rsyslog-5.8.0
+        cd path/to/rsyslog-devel
         make
         make install
 
