@@ -50,6 +50,7 @@
 
 MODULE_TYPE_INPUT
 MODULE_TYPE_NOKEEP
+MODULE_CNFNAME("imzeromq")
 
 /* defines */
 
@@ -73,8 +74,7 @@ static prop_t *				s_namep = NULL;
 /* config settings */
 
 /* accept a new ruleset to bind. Checks if it exists and complains, if not */
-static rsRetVal
-set_ruleset(void __attribute__((unused)) *pVal, uchar *pszName)
+static rsRetVal set_ruleset(void __attribute__((unused)) *pVal, uchar *pszName)
 {
 	ruleset_t *pRuleset;
 	rsRetVal localRet;
@@ -495,15 +495,17 @@ CODEmodInit_QueryRegCFSLineHdlr
     CHKiRet(objUse(ruleset, CORE_COMPONENT));
 
 	/* register config file handlers */
-	CHKiRet(omsdRegCFSLineHdlr((uchar *)"inputzeromqserverbindruleset",
-                               0, eCmdHdlrGetWord, set_ruleset, NULL,
-                               STD_LOADABLE_MODULE_ID, eConfObjGlobal));
-	CHKiRet(omsdRegCFSLineHdlr((uchar *)"inputzeromqserverrun",
-                               0, eCmdHdlrGetWord, add_endpoint, NULL,
-                               STD_LOADABLE_MODULE_ID, eConfObjGlobal));
-	CHKiRet(omsdRegCFSLineHdlr((uchar *)"resetconfigvariables",
-                               1, eCmdHdlrCustomHandler, resetConfigVariables, NULL,
-                               STD_LOADABLE_MODULE_ID, eConfObjGlobal));
+
+    CHKiRet(omsdRegCFSLineHdlr(UCHAR_CONSTANT("inputzeromqserverbindruleset"),
+                               0, eCmdHdlrGetWord, set_ruleset,
+                               NULL, STD_LOADABLE_MODULE_ID));
+    CHKiRet(omsdRegCFSLineHdlr(UCHAR_CONSTANT("inputzeromqserverrun"),
+                               0, eCmdHdlrGetWord, add_endpoint,
+                               NULL, STD_LOADABLE_MODULE_ID));
+    CHKiRet(omsdRegCFSLineHdlr(UCHAR_CONSTANT("resetconfigvariables"),
+                               1, eCmdHdlrCustomHandler, resetConfigVariables,
+                               NULL, STD_LOADABLE_MODULE_ID));
+
 ENDmodInit
 /* vim:set ai:
  */

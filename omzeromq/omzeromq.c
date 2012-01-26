@@ -47,6 +47,7 @@
 
 MODULE_TYPE_OUTPUT
 MODULE_TYPE_NOKEEP
+MODULE_CNFNAME("omzeromq")
 
 static rsRetVal resetConfigVariables(uchar __attribute__((unused)) *pp, void __attribute__((unused)) *pVal);
 
@@ -71,7 +72,7 @@ typedef struct _instanceData {
 typedef struct configSettings_s {
 } configSettings_t;
 
-SCOPING_SUPPORT;
+SCOPING_SUPPORT; /* must be set AFTER configSettings_t is defined */
 
 BEGINinitConfVars              /* (re)set config variables to default values */
 CODESTARTinitConfVars
@@ -380,7 +381,7 @@ CODESTARTmodInit
 	*ipIFVersProvided = CURR_MOD_IF_VERSION; /* we only support the current interface specification */
 CODEmodInit_QueryRegCFSLineHdlr
 	CHKiRet(objUse(errmsg, CORE_COMPONENT));
-    CHKiRet(omsdRegCFSLineHdlr((uchar *)"resetconfigvariables", 1, eCmdHdlrCustomHandler, resetConfigVariables, NULL, STD_LOADABLE_MODULE_ID, eConfObjAction));
+    CHKiRet(omsdRegCFSLineHdlr((uchar *)"resetconfigvariables", 1, eCmdHdlrCustomHandler, resetConfigVariables, NULL, STD_LOADABLE_MODULE_ID));
 CODEmodInit_QueryRegCFSLineHdlr
 ENDmodInit
 
