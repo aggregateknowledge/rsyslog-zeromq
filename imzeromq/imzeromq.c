@@ -80,7 +80,7 @@ set_ruleset(void __attribute__((unused)) *pVal, uchar *pszName)
 	rsRetVal localRet;
 	DEFiRet;
 
-	localRet = ruleset.GetRuleset(&pRuleset, pszName);
+    localRet = ruleset.GetRuleset(ourConf, &pRuleset, pszName);
 	if(localRet == RS_RET_NOT_FOUND) {
 		errmsg.LogError(0, NO_ERRCODE, "error: "
                         "ruleset '%s' not found - ignored", pszName);
@@ -496,14 +496,14 @@ CODEmodInit_QueryRegCFSLineHdlr
 
 	/* register config file handlers */
 	CHKiRet(omsdRegCFSLineHdlr((uchar *)"inputzeromqserverbindruleset",
-                               0, eCmdHdlrGetWord,
-		set_ruleset, NULL, STD_LOADABLE_MODULE_ID));
+                               0, eCmdHdlrGetWord, set_ruleset, NULL,
+                               STD_LOADABLE_MODULE_ID, eConfObjGlobal));
 	CHKiRet(omsdRegCFSLineHdlr((uchar *)"inputzeromqserverrun",
-                               0, eCmdHdlrGetWord,
-		add_endpoint, NULL, STD_LOADABLE_MODULE_ID));
+                               0, eCmdHdlrGetWord, add_endpoint, NULL,
+                               STD_LOADABLE_MODULE_ID, eConfObjGlobal));
 	CHKiRet(omsdRegCFSLineHdlr((uchar *)"resetconfigvariables",
-                               1, eCmdHdlrCustomHandler,
-		resetConfigVariables, NULL, STD_LOADABLE_MODULE_ID));
+                               1, eCmdHdlrCustomHandler, resetConfigVariables, NULL,
+                               STD_LOADABLE_MODULE_ID, eConfObjGlobal));
 ENDmodInit
 /* vim:set ai:
  */

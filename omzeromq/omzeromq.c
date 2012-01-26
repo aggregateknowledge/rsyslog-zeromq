@@ -48,6 +48,8 @@
 MODULE_TYPE_OUTPUT
 MODULE_TYPE_NOKEEP
 
+static rsRetVal resetConfigVariables(uchar __attribute__((unused)) *pp, void __attribute__((unused)) *pVal);
+
 /* internal structures
  */
 DEF_OMOD_STATIC_DATA
@@ -65,6 +67,16 @@ typedef struct _instanceData {
     void *		context;
     void *		socket;
 } instanceData;
+
+typedef struct configSettings_s {
+} configSettings_t;
+
+SCOPING_SUPPORT;
+
+BEGINinitConfVars              /* (re)set config variables to default values */
+CODESTARTinitConfVars
+       resetConfigVariables(NULL, NULL);
+ENDinitConfVars
 
 BEGINcreateInstance
 CODESTARTcreateInstance
@@ -368,7 +380,7 @@ CODESTARTmodInit
 	*ipIFVersProvided = CURR_MOD_IF_VERSION; /* we only support the current interface specification */
 CODEmodInit_QueryRegCFSLineHdlr
 	CHKiRet(objUse(errmsg, CORE_COMPONENT));
-	CHKiRet(omsdRegCFSLineHdlr((uchar *)"resetconfigvariables", 1, eCmdHdlrCustomHandler, resetConfigVariables, NULL, STD_LOADABLE_MODULE_ID));
+    CHKiRet(omsdRegCFSLineHdlr((uchar *)"resetconfigvariables", 1, eCmdHdlrCustomHandler, resetConfigVariables, NULL, STD_LOADABLE_MODULE_ID, eConfObjAction));
 CODEmodInit_QueryRegCFSLineHdlr
 ENDmodInit
 
