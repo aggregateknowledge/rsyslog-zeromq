@@ -72,17 +72,14 @@ typedef struct _instanceData {
 typedef struct configSettings_s {
 } configSettings_t;
 
-SCOPING_SUPPORT; /* must be set AFTER configSettings_t is defined */
-
-BEGINinitConfVars              /* (re)set config variables to default values */
-CODESTARTinitConfVars
-       resetConfigVariables(NULL, NULL);
+BEGINinitConfVars		/* (re)set config variables to default values */
+CODESTARTinitConfVars 
+    /* Nothing here so far */
 ENDinitConfVars
 
 BEGINcreateInstance
 CODESTARTcreateInstance
 ENDcreateInstance
-
 
 BEGINisCompatibleWithFeature
 CODESTARTisCompatibleWithFeature
@@ -378,6 +375,7 @@ static rsRetVal resetConfigVariables(uchar __attribute__((unused)) *pp, void __a
 
 BEGINmodInit()
 CODESTARTmodInit
+INITLegCnfVars
 	*ipIFVersProvided = CURR_MOD_IF_VERSION; /* we only support the current interface specification */
 CODEmodInit_QueryRegCFSLineHdlr
 	CHKiRet(objUse(errmsg, CORE_COMPONENT));
