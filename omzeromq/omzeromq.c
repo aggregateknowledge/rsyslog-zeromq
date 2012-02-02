@@ -25,6 +25,18 @@
 
 #include <zmq.h>
 
+// As described at http://www.zeromq.org/docs:3-0-upgrade
+#ifndef ZMQ_DONTWAIT
+#   define ZMQ_DONTWAIT     ZMQ_NOBLOCK
+#endif
+#if ZMQ_VERSION_MAJOR == 2
+#   define zmq_sendmsg      zmq_send
+#   define zmq_recvmsg      zmq_recv
+#   define ZMQ_POLL_MSEC    1000        //  zmq_poll is usec
+#elif ZMQ_VERSION_MAJOR == 3
+#   define ZMQ_POLL_MSEC    1           //  zmq_poll is msec
+#endif
+
 #include "config.h"
 #include "rsyslog.h"
 #include <stdio.h>
@@ -60,7 +72,9 @@ typedef struct _instanceData {
     uchar *		connstr;
     uchar *		bindstr;
     int64		hwmsz;
+#if defined(USE_ZMQ2)
     int64		swapsz;
+#endif
     uchar *		identstr;
     int64		threads;
     int			pattern;
@@ -117,6 +131,7 @@ static rsRetVal init_zeromq(instanceData *pData, int bSilent)
     // Set options and identities *first* before the connect
     // and/or bind ...
 
+#if defined(USE_ZMQ2)
     if (pData->hwmsz != -1)
         zmq_setsockopt(pData->socket, ZMQ_HWM,
                        &pData->hwmsz, sizeof(pData->hwmsz));
@@ -124,6 +139,11 @@ static rsRetVal init_zeromq(instanceData *pData, int bSilent)
     if (pData->swapsz != -1)
         zmq_setsockopt(pData->socket, ZMQ_SWAP,
                        &pData->swapsz, sizeof(pData->swapsz));
+#else
+    if (pData->hwmsz != -1)
+        zmq_setsockopt(pData->socket, ZMQ_SNDHWM,
+                       &pData->hwmsz, sizeof(pData->hwmsz));
+#endif
 
     if (pData->identstr)
         zmq_setsockopt(pData->socket, ZMQ_IDENTITY,
@@ -159,7 +179,7 @@ CODESTARTdoAction
         // ZMQ_REP sockets only send when we can read a request.
         zmq_msg_t reqmsg;
         zmq_msg_init(&reqmsg);
-        int rc = zmq_recv(pData->socket, &reqmsg, 0);
+        int rc = zmq_recvmsg(pData->socket, &reqmsg, 0);
         zmq_msg_close(&reqmsg);
         if (rc != 0)
         {
@@ -172,7 +192,7 @@ CODESTARTdoAction
             zmq_msg_t msg;
             zmq_msg_init_size(&msg, len);
             memcpy(zmq_msg_data(&msg), ppString[0], len);
-            rc = zmq_send(pData->socket, &msg, ZMQ_NOBLOCK);
+            rc = zmq_sendmsg(pData->socket, &msg, ZMQ_DONTWAIT);
             zmq_msg_close(&msg);
 
             iRet = rc != 0 ? RS_RET_SUSPENDED : RS_RET_OK;
@@ -184,7 +204,7 @@ CODESTARTdoAction
         zmq_msg_t msg;
         zmq_msg_init_size(&msg, len);
         memcpy(zmq_msg_data(&msg), ppString[0], len);
-        int rc = zmq_send(pData->socket, &msg, ZMQ_NOBLOCK);
+        int rc = zmq_sendmsg(pData->socket, &msg, ZMQ_DONTWAIT);
         zmq_msg_close(&msg);
 
         iRet = rc != 0 ? RS_RET_SUSPENDED : RS_RET_OK;
@@ -220,7 +240,9 @@ CODE_STD_STRING_REQUESTparseSelectorAct(1)
     pData->bindstr = NULL;
     pData->pattern = ZMQ_PUSH;
     pData->hwmsz = -1;
+#if defined(USE_ZMQ2)
 	pData->swapsz = -1;
+#endif
     pData->identstr = NULL;
     pData->context = NULL;
     pData->socket = NULL;
@@ -265,6 +287,7 @@ CODE_STD_STRING_REQUESTparseSelectorAct(1)
                 ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
             }
         }
+#if defined(USE_ZMQ2)
         else if (strcmp(binding, "swap") == 0)
         {
             pData->swapsz = strtoull(val, &endp, 10);
@@ -274,6 +297,7 @@ CODE_STD_STRING_REQUESTparseSelectorAct(1)
                 ABORT_FINALIZE(RS_RET_INVALID_PARAMS);
             }
         }
+#endif
         else if (strcmp(binding, "identity") == 0)
         {
             CHKmalloc(pData->identstr = (uchar*) strdup(val));

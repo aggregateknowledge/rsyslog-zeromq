@@ -48,6 +48,18 @@
 
 #include <zmq.h>
 
+// As described at http://www.zeromq.org/docs:3-0-upgrade
+#ifndef ZMQ_DONTWAIT
+#   define ZMQ_DONTWAIT     ZMQ_NOBLOCK
+#endif
+#if ZMQ_VERSION_MAJOR == 2
+#   define zmq_sendmsg      zmq_send
+#   define zmq_recvmsg      zmq_recv
+#   define ZMQ_POLL_MSEC    1000        //  zmq_poll is usec
+#elif ZMQ_VERSION_MAJOR == 3
+#   define ZMQ_POLL_MSEC    1           //  zmq_poll is msec
+#endif
+
 MODULE_TYPE_INPUT
 MODULE_TYPE_NOKEEP
 MODULE_CNFNAME("imzeromq")
@@ -350,7 +362,7 @@ rsRetVal rcv_loop(thrdInfo_t *pThrd)
 {
 	DEFiRet;
 
-    long timeout = 1000 * 1000;	// uSec
+    long timeout = 1000 * ZMQ_POLL_MSEC;	// one second
 
     while (!pThrd->bShallStop)
     {
@@ -363,7 +375,7 @@ rsRetVal rcv_loop(thrdInfo_t *pThrd)
                 zmq_msg_t zmqmsg;
 
                 zmq_msg_init(&zmqmsg);
-                zmq_recv(s_pollitems[ii].socket, &zmqmsg, 0);
+                zmq_recvmsg(s_pollitems[ii].socket, &zmqmsg, 0);
 
                 size_t sz = zmq_msg_size(&zmqmsg);
                 if (sz > s_maxline - 1)
