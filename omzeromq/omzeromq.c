@@ -181,7 +181,7 @@ CODESTARTdoAction
         zmq_msg_init(&reqmsg);
         int rc = zmq_recvmsg(pData->socket, &reqmsg, 0);
         zmq_msg_close(&reqmsg);
-        if (rc != 0)
+        if (rc == -1)
         {
             // Something is wrong.
             iRet = RS_RET_SUSPENDED;
@@ -195,7 +195,7 @@ CODESTARTdoAction
             rc = zmq_sendmsg(pData->socket, &msg, ZMQ_DONTWAIT);
             zmq_msg_close(&msg);
 
-            iRet = rc != 0 ? RS_RET_SUSPENDED : RS_RET_OK;
+            iRet = rc == -1 ? RS_RET_SUSPENDED : RS_RET_OK;
         }
     }
     else
@@ -207,7 +207,7 @@ CODESTARTdoAction
         int rc = zmq_sendmsg(pData->socket, &msg, ZMQ_DONTWAIT);
         zmq_msg_close(&msg);
 
-        iRet = rc != 0 ? RS_RET_SUSPENDED : RS_RET_OK;
+        iRet = rc == -1 ? RS_RET_SUSPENDED : RS_RET_OK;
     }
 
 finalize_it:
