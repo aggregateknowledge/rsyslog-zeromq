@@ -29,10 +29,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "rsyslog.h"
 
 #include "cfsysline.h"
-#include "config.h"
 #include "datetime.h"
 #include "dirty.h"
 #include "errmsg.h"
